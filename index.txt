@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트 유학 매칭 | RoayouEdu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #3b82f6;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --white: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); line-height: 1.6; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+        /* Header */
+        header { background: var(--white); padding: 1.5rem 0; border-bottom: 1px solid #e2e8f0; sticky: top; }
+        .nav-inner { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--primary); text-decoration: none; }
+
+        /* Hero & Upload */
+        .hero { padding: 4rem 0; text-align: center; background: linear-gradient(to bottom, #eff6ff, var(--bg)); }
+        .upload-zone {
+            background: var(--white); border: 2px dashed #cbd5e1; padding: 3rem;
+            border-radius: 20px; margin: 2rem auto; max-width: 600px; cursor: pointer;
+            transition: 0.3s;
+        }
+        .upload-zone:hover { border-color: var(--primary); background: #f1f5f9; }
+
+        /* Search & Filter */
+        .search-section { background: var(--white); padding: 2rem; border-radius: 15px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-top: -2rem; }
+        .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem; }
+        select, input { width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; }
+
+        /* Program List */
+        .program-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; padding: 4rem 0; }
+        .program-card { background: var(--white); border-radius: 15px; overflow: hidden; transition: 0.3s; border: 1px solid #e2e8f0; }
+        .program-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .card-img { height: 180px; background: #cbd5e1; display: flex; align-items: center; justify-content: center; color: #64748b; }
+        .card-content { padding: 1.5rem; }
+        .tag { display: inline-block; padding: 0.25rem 0.75rem; background: #dbeafe; color: var(--primary); border-radius: 99px; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .price { font-size: 1.25rem; font-weight: 700; color: var(--text); margin-top: 1rem; }
+
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 100; }
+        .modal-content { background: var(--white); padding: 2.5rem; border-radius: 20px; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .close-btn { float: right; cursor: pointer; font-size: 1.5rem; font-weight: bold; }
+
+        footer { text-align: center; padding: 3rem; color: #64748b; border-top: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container nav-inner">
+        <a href="#" class="logo">RoayouEdu</a>
+        <div style="font-weight: 600;">Roayou.com</div>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <h1>나에게 딱 맞는 유학 프로그램을 찾으세요</h1>
+        <p>AI가 분석한 PDF 브로셔 데이터를 바탕으로 최적의 매칭을 제공합니다.</p>
+        
+        <div class="upload-zone" onclick="simulateUpload()">
+            <div style="font-size: 3rem;">📄</div>
+            <h3>브로셔 PDF 업로드</h3>
+            <p>파일을 끌어다 놓거나 클릭하여 분석을 시작하세요 (추출 기능 데모)</p>
+            <input type="file" id="pdfInput" style="display:none">
+        </div>
+    </div>
+</section>
+
+<section class="container">
+    <div class="search-section">
+        <h3>스마트 맞춤 검색</h3>
+        <div class="filter-grid">
+            <select id="regionFilter" onchange="filterPrograms()">
+                <option value="all">모든 지역</option>
+                <option value="london">영국 - 런던</option>
+                <option value="oxford">영국 - 옥스퍼드</option>
+                <option value="usa">미국</option>
+            </select>
+            <select id="typeFilter" onchange="filterPrograms()">
+                <option value="all">모든 프로그램</option>
+                <option value="general">일반 영어</option>
+                <option value="degree">학위 과정</option>
+                <option value="camp">주니어 캠프</option>
+            </select>
+            <input type="text" id="budgetInput" placeholder="최대 예산 (원)" onkeyup="filterPrograms()">
+        </div>
+    </div>
+
+    <div class="program-grid" id="programList">
+        </div>
+</section>
+
+<div class="modal" id="programModal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <div id="modalBody"></div>
+    </div>
+</div>
+
+<footer>
+    <p>사업자명: RoayouEdu | 공식 홈페이지: Roayou.com</p>
+    <p>&copy; 2026 RoayouEdu Matching System. All Rights Reserved.</p>
+</footer>
+
+<script>
+    const programs = [
+        { id: 1, name: "런던 비즈니스 어학원", region: "london", type: "general", price: 2500000, tags: ["인기", "런던 중심"], desc: "PDF 브로셔 분석 결과: 런던 중심가 위치, 8단계 레벨 세분화, 인턴십 연계 가능." },
+        { id: 2, name: "옥스퍼드 아카데미", region: "oxford", type: "degree", price: 4500000, tags: ["명문", "학위"], desc: "PDF 브로셔 분석 결과: 옥스퍼드 대학교 진학 패스웨이 제공, 1:1 튜터링 포함." },
+        { id: 3, name: "뉴욕 글로벌 센터", region: "usa", type: "general", price: 3200000, tags: ["미국", "집중학습"], desc: "PDF 브로셔 분석 결과: 맨해튼 위치, 테크니컬 영어 강화, 글로벌 네트워킹 강점." },
+        { id: 4, name: "영국 주니어 캠프", region: "london", type: "camp", price: 1800000, tags: ["단기", "청소년"], desc: "PDF 브로셔 분석 결과: 여름 시즌 한정, 기숙사 완비, 현지 체험 중심 커리큘럼." }
+    ];
+
+    function renderPrograms(data) {
+        const list = document.getElementById('programList');
+        list.innerHTML = data.map(p => `
+            <div class="program-card" onclick="openModal(${p.id})">
+                <div class="card-img">${p.name}</div>
+                <div class="card-content">
+                    <span class="tag">${p.tags[0]}</span>
+                    <h4>${p.name}</h4>
+                    <p style="font-size: 0.9rem; color: #64748b;">${p.region.toUpperCase()} | ${p.type}</p>
+                    <div class="price">₩ ${p.price.toLocaleString()}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function filterPrograms() {
+        const region = document.getElementById('regionFilter').value;
+        const type = document.getElementById('typeFilter').value;
+        const budget = document.getElementById('budgetInput').value;
+
+        const filtered = programs.filter(p => {
+            const matchRegion = region === 'all' || p.region === region;
+            const matchType = type === 'all' || p.type === type;
+            const matchBudget = !budget || p.price <= parseInt(budget);
+            return matchRegion && matchType && matchBudget;
+        });
+        renderPrograms(filtered);
+    }
+
+    function simulateUpload() {
+        alert("AI가 PDF 브로셔의 텍스트와 이미지를 분석 중입니다...\n지역: 런던, 학비: 2,500,000원 정보를 추출했습니다.");
+        filterPrograms();
+    }
+
+    function openModal(id) {
+        const p = programs.find(item => item.id === id);
+        const modal = document.getElementById('programModal');
+        const body = document.getElementById('modalBody');
+        body.innerHTML = `
+            <h2>${p.name} 상세 정보</h2>
+            <p style="color: var(--primary); margin: 1rem 0;">${p.region.toUpperCase()} / ${p.type.toUpperCase()}</p>
+            <hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid #e2e8f0;">
+            <h3>브로셔 분석 내용</h3>
+            <p style="margin-top: 1rem; background: #f1f5f9; padding: 1.5rem; border-radius: 10px;">${p.desc}</p>
+            <div class="price" style="font-size: 1.5rem; margin-top: 2rem;">총 비용: ₩ ${p.price.toLocaleString()}</div>
+            <button class="cta-button" style="background: var(--primary); color: white; padding: 1rem 2rem; border: none; border-radius: 10px; margin-top: 2rem; cursor: pointer; width: 100%; font-weight: 700;">상담 예약하기</button>
+        `;
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('programModal').style.display = 'none';
+    }
+
+    // 초기 렌더링
+    renderPrograms(programs);
+</script>
+</body>
+</html>
